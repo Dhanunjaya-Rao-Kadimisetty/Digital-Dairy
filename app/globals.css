@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply min-h-screen bg-cedar text-parchment antialiased;
+  background-image:
+    radial-gradient(circle at top left, rgba(230, 210, 194, 0.12), transparent 24%),
+    radial-gradient(circle at top right, rgba(191, 143, 98, 0.12), transparent 22%),
+    linear-gradient(180deg, #2f1b15 0%, #1a100d 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.32;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 140px 140px;
+  mask-image: radial-gradient(circle at center, black, transparent 82%);
+}
+
+::selection {
+  background: rgba(209, 151, 124, 0.4);
+  color: #fff8f2;
+}
+
+@layer base {
+  * {
+    @apply border-white/10;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight text-parchment;
+  }
+
+  a {
+    @apply transition-colors;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-3xl border border-white/10 shadow-glow backdrop-blur-xl;
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .page-shell {
+    @apply relative mx-auto w-full max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-8;
+  }
+
+  .page-title {
+    @apply font-serif text-4xl font-semibold text-parchment sm:text-5xl;
+  }
+
+  .page-copy {
+    @apply max-w-2xl text-sm leading-7 text-parchment/70 sm:text-base;
+  }
+
+  .soft-input {
+    @apply w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-parchment placeholder:text-parchment/35 focus:border-gold/50 focus:outline-none focus:ring-2 focus:ring-gold/20;
+  }
+
+  .soft-label {
+    @apply mb-2 block text-xs font-semibold uppercase tracking-[0.3em] text-parchment/55;
+  }
+
+  .soft-button {
+    @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-parchment px-5 py-3 text-sm font-semibold text-cedar transition hover:scale-[1.01] hover:bg-white disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .soft-button-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-parchment transition disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .soft-button-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 9999px;
+  }
+}
