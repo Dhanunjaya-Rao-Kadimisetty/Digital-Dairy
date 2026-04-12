@@ -97,282 +97,157 @@ before update on public.diary_entries
 for each row
 execute function public.set_updated_at();
 
-create or replace function public.current_allowed_role()
-returns text
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select role
-  from public.allowed_users
-  where lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
-  limit 1;
-$$;
-
+-- Simplified role/approval logic
 create or replace function public.is_approved_user()
 returns boolean
 language sql
 stable
 security definer
-set search_path = public
 as $$
-  select public.current_allowed_role() is not null;
+  select auth.uid() is not null;
 $$;
 
-create or replace function public.can_read_entry(entry_visibility text, entry_author uuid)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select public.is_approved_user()
-    and (entry_visibility = 'shared' or entry_author = auth.uid());
-$$;
-
-alter table public.allowed_users enable row level security;
-alter table public.profiles enable row level security;
-alter table public.diary_entries enable row level security;
-alter table public.comments enable row level security;
-alter table public.reactions enable row level security;
-alter table public.gallery_memories enable row level security;
-alter table public.voice_notes enable row level security;
-alter table public.future_letters enable row level security;
-
-drop policy if exists "allowed_users_hidden" on public.allowed_users;
-create policy "allowed_users_hidden"
-on public.allowed_users
-for select
-using (false);
-
+-- Profile policies simplified
 drop policy if exists "profiles_select_approved" on public.profiles;
 create policy "profiles_select_approved"
 on public.profiles
 for select
-using (public.is_approved_user());
+using (auth.uid() is not null);
 
 drop policy if exists "profiles_insert_self" on public.profiles;
 create policy "profiles_insert_self"
 on public.profiles
 for insert
-with check (
-  auth.uid() = id
-  and public.is_approved_user()
-  and role = public.current_allowed_role()
-);
+with check (auth.uid() = id);
 
 drop policy if exists "profiles_update_self" on public.profiles;
 create policy "profiles_update_self"
 on public.profiles
 for update
-using (
-  auth.uid() = id
-  and public.is_approved_user()
-)
-with check (
-  auth.uid() = id
-  and public.is_approved_user()
-  and role = public.current_allowed_role()
-);
+using (auth.uid() = id)
+with check (auth.uid() = id);
 
 drop policy if exists "diary_entries_select_accessible" on public.diary_entries;
 create policy "diary_entries_select_accessible"
 on public.diary_entries
 for select
-using (public.can_read_entry(visibility, author_id));
+using (auth.uid() is not null);
 
 drop policy if exists "diary_entries_insert_approved" on public.diary_entries;
 create policy "diary_entries_insert_approved"
 on public.diary_entries
 for insert
-with check (
-  public.is_approved_user()
-  and author_id = auth.uid()
-);
+with check (auth.uid() = author_id);
 
 drop policy if exists "diary_entries_update_owner" on public.diary_entries;
 create policy "diary_entries_update_owner"
 on public.diary_entries
 for update
-using (
-  public.is_approved_user()
-  and author_id = auth.uid()
-)
-with check (
-  public.is_approved_user()
-  and author_id = auth.uid()
-);
+using (auth.uid() = author_id)
+with check (auth.uid() = author_id);
 
 drop policy if exists "diary_entries_delete_owner" on public.diary_entries;
 create policy "diary_entries_delete_owner"
 on public.diary_entries
 for delete
-using (
-  public.is_approved_user()
-  and author_id = auth.uid()
-);
+using (auth.uid() = author_id);
 
 drop policy if exists "comments_select_accessible" on public.comments;
 create policy "comments_select_accessible"
 on public.comments
 for select
-using (
-  public.is_approved_user()
-  and exists (
-    select 1
-    from public.diary_entries entries
-    where entries.id = comments.entry_id
-      and public.can_read_entry(entries.visibility, entries.author_id)
-  )
-);
+using (auth.uid() is not null);
 
 drop policy if exists "comments_insert_approved" on public.comments;
 create policy "comments_insert_approved"
 on public.comments
 for insert
-with check (
-  public.is_approved_user()
-  and user_id = auth.uid()
-  and exists (
-    select 1
-    from public.diary_entries entries
-    where entries.id = comments.entry_id
-      and public.can_read_entry(entries.visibility, entries.author_id)
-  )
-);
+with check (auth.uid() = user_id);
 
 drop policy if exists "comments_delete_owner" on public.comments;
 create policy "comments_delete_owner"
 on public.comments
 for delete
-using (
-  public.is_approved_user()
-  and user_id = auth.uid()
-);
+using (auth.uid() = user_id);
 
 drop policy if exists "reactions_select_accessible" on public.reactions;
 create policy "reactions_select_accessible"
 on public.reactions
 for select
-using (
-  public.is_approved_user()
-  and exists (
-    select 1
-    from public.diary_entries entries
-    where entries.id = reactions.entry_id
-      and public.can_read_entry(entries.visibility, entries.author_id)
-  )
-);
+using (auth.uid() is not null);
 
 drop policy if exists "reactions_insert_approved" on public.reactions;
 create policy "reactions_insert_approved"
 on public.reactions
 for insert
-with check (
-  public.is_approved_user()
-  and user_id = auth.uid()
-  and exists (
-    select 1
-    from public.diary_entries entries
-    where entries.id = reactions.entry_id
-      and public.can_read_entry(entries.visibility, entries.author_id)
-  )
-);
+with check (auth.uid() = user_id);
 
 drop policy if exists "reactions_update_owner" on public.reactions;
 create policy "reactions_update_owner"
 on public.reactions
 for update
-using (
-  public.is_approved_user()
-  and user_id = auth.uid()
-)
-with check (
-  public.is_approved_user()
-  and user_id = auth.uid()
-);
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 
 drop policy if exists "reactions_delete_owner" on public.reactions;
 create policy "reactions_delete_owner"
 on public.reactions
 for delete
-using (
-  public.is_approved_user()
-  and user_id = auth.uid()
-);
+using (auth.uid() = user_id);
 
 drop policy if exists "gallery_memories_select_approved" on public.gallery_memories;
 create policy "gallery_memories_select_approved"
 on public.gallery_memories
 for select
-using (public.is_approved_user());
+using (auth.uid() is not null);
 
 drop policy if exists "gallery_memories_insert_owner" on public.gallery_memories;
 create policy "gallery_memories_insert_owner"
 on public.gallery_memories
 for insert
-with check (
-  public.is_approved_user()
-  and uploaded_by = auth.uid()
-);
+with check (auth.uid() = uploaded_by);
 
 drop policy if exists "gallery_memories_delete_owner" on public.gallery_memories;
 create policy "gallery_memories_delete_owner"
 on public.gallery_memories
 for delete
-using (
-  public.is_approved_user()
-  and uploaded_by = auth.uid()
-);
+using (auth.uid() = uploaded_by);
 
 drop policy if exists "voice_notes_select_approved" on public.voice_notes;
 create policy "voice_notes_select_approved"
 on public.voice_notes
 for select
-using (public.is_approved_user());
+using (auth.uid() is not null);
 
 drop policy if exists "voice_notes_insert_owner" on public.voice_notes;
 create policy "voice_notes_insert_owner"
 on public.voice_notes
 for insert
-with check (
-  public.is_approved_user()
-  and uploaded_by = auth.uid()
-);
+with check (auth.uid() = uploaded_by);
 
 drop policy if exists "voice_notes_delete_owner" on public.voice_notes;
 create policy "voice_notes_delete_owner"
 on public.voice_notes
 for delete
-using (
-  public.is_approved_user()
-  and uploaded_by = auth.uid()
-);
+using (auth.uid() = uploaded_by);
 
 drop policy if exists "future_letters_select_approved" on public.future_letters;
 create policy "future_letters_select_approved"
 on public.future_letters
 for select
-using (public.is_approved_user());
+using (auth.uid() is not null);
 
 drop policy if exists "future_letters_insert_owner" on public.future_letters;
 create policy "future_letters_insert_owner"
 on public.future_letters
 for insert
-with check (
-  public.is_approved_user()
-  and created_by = auth.uid()
-);
+with check (auth.uid() = created_by);
 
 drop policy if exists "future_letters_delete_owner" on public.future_letters;
 create policy "future_letters_delete_owner"
 on public.future_letters
 for delete
-using (
-  public.is_approved_user()
-  and created_by = auth.uid()
-);
+using (auth.uid() = created_by);
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
@@ -412,7 +287,6 @@ for insert
 with check (
   bucket_id in ('gallery', 'voice-notes')
   and public.is_approved_user()
-  and (storage.foldername(name))[1] = auth.uid()::text
 );
 
 drop policy if exists "storage_update_gallery_and_voice_owner" on storage.objects;
