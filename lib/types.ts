@@ -6,6 +6,7 @@ export type Profile = {
   name: string;
   role: Role;
   avatar_url: string | null;
+  last_seen_at: string;
 };
 
 export type DiaryEntry = {

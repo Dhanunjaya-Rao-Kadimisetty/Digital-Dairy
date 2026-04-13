@@ -34,3 +34,21 @@ export async function getProfileSnapshot(profile: Profile) {
     reactions: reactions.count ?? 0
   };
 }
+
+export async function getPartnerProfile(currentUserId: string): Promise<Profile | null> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .neq("id", currentUserId)
+    .limit(1)
+    .single();
+
+  if (error) {
+    return null;
+  }
+
+  return data as Profile;
+}
+

@@ -15,10 +15,13 @@ import { SectionCard } from "@/components/ui/section-card";
 import { StatCard } from "@/components/ui/stat-card";
 import { getViewerOrRedirect } from "@/lib/auth/approved-users";
 import { getDashboardSnapshot } from "@/lib/data/dashboard";
+import { getPartnerProfile } from "@/lib/data/profile";
+import { PartnerStatus } from "@/components/dashboard/partner-status";
 
 export default async function DashboardPage() {
   const { profile } = await getViewerOrRedirect();
   const snapshot = await getDashboardSnapshot(profile);
+  const partner = await getPartnerProfile(profile.id);
 
   return (
     <div className="space-y-6">
@@ -38,6 +41,13 @@ export default async function DashboardPage() {
           </div>
         }
       />
+
+      {partner && (
+        <div className="max-w-xs">
+          <PartnerStatus profile={partner} />
+        </div>
+      )}
+
 
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

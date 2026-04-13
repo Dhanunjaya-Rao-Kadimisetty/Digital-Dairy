@@ -3,6 +3,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { LogoutButton } from "@/components/layout/logout-button";
 import { Sidebar } from "@/components/layout/sidebar";
 import { getInitials } from "@/lib/utils";
+import { PresenceTracker } from "@/components/auth/presence-tracker";
 
 export function AppShell({
   profile,
@@ -13,6 +14,7 @@ export function AppShell({
 }) {
   return (
     <div className="page-shell min-h-screen pb-24 xl:pb-12">
+      <PresenceTracker />
       <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
         <div className="hidden xl:block">
           <Sidebar profile={profile} />
