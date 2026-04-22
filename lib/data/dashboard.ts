@@ -23,7 +23,7 @@ export async function getDashboardSnapshot(profile: Profile): Promise<DashboardS
   const recentEntriesQuery = supabase
     .from("diary_entries")
     .select(
-      "*, author:profiles!diary_entries_author_id_fkey(id, name, role, avatar_url), comments(id), reactions(id)"
+      "*, author:profiles!diary_entries_author_id_fkey(id, name, role, avatar_url), comments(id), reactions(id, emoji, user_id)"
     )
     .order("created_at", { ascending: false })
     .limit(4);

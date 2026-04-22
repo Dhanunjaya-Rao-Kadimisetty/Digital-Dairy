@@ -74,6 +74,7 @@ export async function toggleReactionAction(
   const { profile, supabase } = await getViewerOrRedirect();
   const { entryId, emoji } = parsed.data;
 
+  // Explicitly fetch the existing reaction for this user and entry
   const { data: existing, error: fetchError } = await supabase
     .from("reactions")
     .select("id, emoji")
@@ -82,24 +83,33 @@ export async function toggleReactionAction(
     .maybeSingle();
 
   if (fetchError) {
+    console.error("Fetch reaction error:", fetchError);
     return { success: false, error: fetchError.message };
   }
 
-  const query =
-    existing?.emoji === emoji
-      ? supabase.from("reactions").delete().eq("id", existing.id)
-      : supabase.from("reactions").upsert(
-          {
-            entry_id: entryId,
-            user_id: profile.id,
-            emoji
-          },
-          { onConflict: "entry_id,user_id" }
-        );
+  let dbQuery;
 
-  const { error } = await query;
+  if (existing) {
+    if (existing.emoji === emoji) {
+      // If same emoji, we toggle it off (delete)
+      dbQuery = supabase.from("reactions").delete().eq("id", existing.id);
+    } else {
+      // If different emoji, we update the existing reaction
+      dbQuery = supabase.from("reactions").update({ emoji }).eq("id", existing.id);
+    }
+  } else {
+    // No reaction yet, create a new one
+    dbQuery = supabase.from("reactions").insert({
+      entry_id: entryId,
+      user_id: profile.id,
+      emoji
+    });
+  }
+
+  const { error } = await dbQuery;
 
   if (error) {
+    console.error("Reaction action error:", error);
     return { success: false, error: error.message };
   }
 
