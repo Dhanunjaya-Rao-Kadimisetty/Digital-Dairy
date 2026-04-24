@@ -79,15 +79,16 @@ export async function toggleReactionAction(
     return { success: false, error: parsed.error.issues[0]?.message };
   }
 
-  const { profile, supabase } = await getViewerOrRedirect();
+  const { user, supabase } = await getViewerOrRedirect();
   const { entryId, emoji } = parsed.data;
+  const userId = user.id;
 
   // Explicitly fetch the existing reaction for this user and entry
   const { data: existing, error: fetchError } = await supabase
     .from("reactions")
     .select("id, emoji")
     .eq("entry_id", entryId)
-    .eq("user_id", profile.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (fetchError) {
@@ -109,7 +110,7 @@ export async function toggleReactionAction(
     // No reaction yet, create a new one
     dbQuery = supabase.from("reactions").insert({
       entry_id: entryId,
-      user_id: profile.id,
+      user_id: userId,
       emoji
     });
   }
