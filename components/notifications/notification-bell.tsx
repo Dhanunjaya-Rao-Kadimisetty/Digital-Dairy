@@ -68,11 +68,12 @@ export function NotificationBell({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative grid size-10 place-items-center rounded-full bg-white/5 transition hover:bg-white/10"
+        className="relative grid size-10 place-items-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20"
+        title="Notifications"
       >
-        <Bell className="size-5 text-parchment/70" />
+        <Bell className="size-5 text-gold" />
         {unreadCount > 0 && (
-          <span className="absolute right-2 top-2 size-2.5 rounded-full bg-gold shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
+          <span className="absolute right-0 top-0 size-3 rounded-full bg-red-500 shadow-lg" />
         )}
       </button>
 
