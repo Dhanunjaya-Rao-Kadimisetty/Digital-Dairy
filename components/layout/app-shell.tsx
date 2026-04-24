@@ -18,14 +18,7 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="page-shell min-h-screen border-4 border-gold pb-24 xl:pb-12">
-      <div className="fixed bottom-24 left-6 z-[9999]">
-        <NotificationBell
-          userId={profile.id}
-          initialCount={unreadCount}
-          initialNotifications={notifications}
-        />
-      </div>
+    <div className="page-shell min-h-screen pb-24 xl:pb-12">
       <PresenceTracker />
       <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
         <div className="hidden xl:block">

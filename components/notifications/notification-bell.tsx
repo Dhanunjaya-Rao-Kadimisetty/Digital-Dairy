@@ -26,7 +26,7 @@ export function NotificationBell({
     const supabase = createSupabaseBrowserClient();
 
     const channel = supabase
-      .channel("notifications")
+      .channel(`notifications-${userId}-${Math.random()}`)
       .on(
         "postgres_changes",
         {
