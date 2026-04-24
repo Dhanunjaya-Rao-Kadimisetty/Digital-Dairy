@@ -19,6 +19,13 @@ export function AppShell({
 }) {
   return (
     <div className="page-shell min-h-screen pb-24 xl:pb-12">
+      <div className="fixed bottom-24 left-6 z-[9999] xl:hidden">
+        <NotificationBell
+          userId={profile.id}
+          initialCount={unreadCount}
+          initialNotifications={notifications}
+        />
+      </div>
       <PresenceTracker />
       <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
         <div className="hidden xl:block">
