@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { navigation } from "@/lib/constants";
-import type { Profile } from "@/lib/types";
 import { cn, getInitials } from "@/lib/utils";
 import { LogoMark } from "@/components/ui/logo-mark";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -68,6 +67,7 @@ export function Sidebar({ profile, notifications, unreadCount }: SidebarProps) {
           </div>
         </div>
       </div>
+    </div>
     </aside>
   );
 }
