@@ -78,3 +78,17 @@ export type DashboardSnapshot = {
   voiceNotes: number;
   futureLetters: number;
 };
+
+export type NotificationType = "diary_entry" | "comment" | "reaction" | "memory" | "voice_note" | "future_letter";
+
+export type Notification = {
+  id: string;
+  user_id: string;
+  actor_id: string;
+  type: NotificationType;
+  entry_id?: string;
+  content?: string;
+  is_read: boolean;
+  created_at: string;
+  actor?: Profile;
+};

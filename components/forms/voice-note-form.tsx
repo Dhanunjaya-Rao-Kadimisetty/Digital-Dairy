@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { slugifyFilename } from "@/lib/utils";
 import { voiceNoteSchema, type VoiceNoteValues } from "@/lib/validators/storage";
+import { createNotification } from "@/lib/actions/notifications";
 import { FieldError } from "@/components/ui/field-error";
 
 export function VoiceNoteForm({ userId }: { userId: string }) {
@@ -59,6 +60,12 @@ export function VoiceNoteForm({ userId }: { userId: string }) {
         await supabase.storage.from("voice-notes").remove([path]);
         return;
       }
+
+      // Notify partner
+      await createNotification({
+        type: "voice_note",
+        content: values.title
+      });
 
       toast.success("Voice note saved.");
       form.reset();

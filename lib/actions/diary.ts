@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getViewerOrRedirect } from "@/lib/auth/approved-users";
 import { diaryEntrySchema, type DiaryEntryValues } from "@/lib/validators/diary";
 
+import { createNotification } from "./notifications";
 import type { ActionResult } from "./auth";
 
 function revalidateDiaryViews(entryId?: string) {
@@ -26,16 +27,29 @@ export async function createDiaryEntryAction(
 
   const { profile, supabase } = await getViewerOrRedirect();
 
-  const { error } = await supabase.from("diary_entries").insert({
-    title: parsed.data.title,
-    content: parsed.data.content,
-    mood: parsed.data.mood,
-    visibility: parsed.data.visibility,
-    author_id: profile.id
-  });
+  const { data, error } = await supabase
+    .from("diary_entries")
+    .insert({
+      title: parsed.data.title,
+      content: parsed.data.content,
+      mood: parsed.data.mood,
+      visibility: parsed.data.visibility,
+      author_id: profile.id
+    })
+    .select("id")
+    .single();
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Notify partner
+  if (parsed.data.visibility === "shared") {
+    await createNotification({
+      type: "diary_entry",
+      entryId: data.id,
+      content: parsed.data.title
+    });
   }
 
   revalidateDiaryViews();

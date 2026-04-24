@@ -8,6 +8,7 @@ import {
   type FutureLetterValues
 } from "@/lib/validators/future-letter";
 
+import { createNotification } from "./notifications";
 import type { ActionResult } from "./auth";
 
 function revalidateLetters(letterId?: string) {
@@ -39,6 +40,12 @@ export async function createFutureLetterAction(
   if (error) {
     return { success: false, error: error.message };
   }
+
+  // Notify partner
+  await createNotification({
+    type: "future_letter",
+    content: parsed.data.title
+  });
 
   revalidateLetters();
   return { success: true };

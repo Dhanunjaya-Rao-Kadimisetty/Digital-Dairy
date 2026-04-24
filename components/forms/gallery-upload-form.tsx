@@ -13,6 +13,7 @@ import {
   galleryUploadSchema,
   type GalleryUploadValues
 } from "@/lib/validators/storage";
+import { createNotification } from "@/lib/actions/notifications";
 import { FieldError } from "@/components/ui/field-error";
 
 export function GalleryUploadForm({ userId }: { userId: string }) {
@@ -62,6 +63,12 @@ export function GalleryUploadForm({ userId }: { userId: string }) {
         await supabase.storage.from("gallery").remove([path]);
         return;
       }
+
+      // Notify partner
+      await createNotification({
+        type: "memory",
+        content: values.caption
+      });
 
       toast.success("Memory added to the gallery.");
       form.reset();

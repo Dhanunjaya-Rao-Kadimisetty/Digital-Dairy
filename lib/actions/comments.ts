@@ -10,6 +10,7 @@ import {
   type ReactionValues
 } from "@/lib/validators/diary";
 
+import { createNotification } from "./notifications";
 import type { ActionResult } from "./auth";
 
 function revalidateEntry(entryId: string) {
@@ -38,6 +39,13 @@ export async function createCommentAction(
   if (error) {
     return { success: false, error: error.message };
   }
+
+  // Notify partner
+  await createNotification({
+    type: "comment",
+    entryId: parsed.data.entryId,
+    content: parsed.data.content
+  });
 
   revalidateEntry(parsed.data.entryId);
   return { success: true };
@@ -111,6 +119,15 @@ export async function toggleReactionAction(
   if (error) {
     console.error("Reaction action error:", error);
     return { success: false, error: error.message };
+  }
+
+  // Notify partner (only if adding/changing, not removing)
+  if (!existing || existing.emoji !== emoji) {
+    await createNotification({
+      type: "reaction",
+      entryId,
+      content: emoji
+    });
   }
 
   revalidateEntry(entryId);

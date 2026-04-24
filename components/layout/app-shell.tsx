@@ -1,15 +1,20 @@
-import type { Profile } from "@/lib/types";
+import type { Notification, Profile } from "@/lib/types";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { LogoutButton } from "@/components/layout/logout-button";
 import { Sidebar } from "@/components/layout/sidebar";
 import { getInitials } from "@/lib/utils";
 import { PresenceTracker } from "@/components/auth/presence-tracker";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export function AppShell({
   profile,
+  notifications,
+  unreadCount,
   children
 }: {
   profile: Profile;
+  notifications: Notification[];
+  unreadCount: number;
   children: React.ReactNode;
 }) {
   return (
@@ -34,7 +39,14 @@ export function AppShell({
                 </p>
               </div>
             </div>
-            <LogoutButton />
+            <div className="flex items-center gap-3">
+              <NotificationBell
+                userId={profile.id}
+                initialCount={unreadCount}
+                initialNotifications={notifications}
+              />
+              <LogoutButton />
+            </div>
           </header>
           <div>{children}</div>
         </div>
