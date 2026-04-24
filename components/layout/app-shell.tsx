@@ -22,7 +22,11 @@ export function AppShell({
       <PresenceTracker />
       <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
         <div className="hidden xl:block">
-          <Sidebar profile={profile} />
+          <Sidebar
+            profile={profile}
+            notifications={notifications}
+            unreadCount={unreadCount}
+          />
         </div>
         <div className="space-y-6">
           <header className="glass-panel flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -40,18 +44,17 @@ export function AppShell({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <NotificationBell
-                userId={profile.id}
-                initialCount={unreadCount}
-                initialNotifications={notifications}
-              />
               <LogoutButton />
             </div>
           </header>
           <div>{children}</div>
         </div>
       </div>
-      <MobileNav />
+      <MobileNav
+        profile={profile}
+        notifications={notifications}
+        unreadCount={unreadCount}
+      />
     </div>
   );
 }

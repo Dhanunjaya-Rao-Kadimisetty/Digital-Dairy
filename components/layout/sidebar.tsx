@@ -7,12 +7,16 @@ import { navigation } from "@/lib/constants";
 import type { Profile } from "@/lib/types";
 import { cn, getInitials } from "@/lib/utils";
 import { LogoMark } from "@/components/ui/logo-mark";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import type { Notification, Profile } from "@/lib/types";
 
 type SidebarProps = {
   profile: Profile;
+  notifications: Notification[];
+  unreadCount: number;
 };
 
-export function Sidebar({ profile }: SidebarProps) {
+export function Sidebar({ profile, notifications, unreadCount }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -42,7 +46,16 @@ export function Sidebar({ profile }: SidebarProps) {
         </nav>
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-black/15 p-4">
+      <div className="space-y-4">
+        <div className="flex justify-center">
+          <NotificationBell
+            userId={profile.id}
+            initialCount={unreadCount}
+            initialNotifications={notifications}
+          />
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-black/15 p-4">
         <div className="flex items-center gap-3">
           <div className="grid size-12 place-items-center rounded-full bg-white/10 font-semibold text-parchment">
             {getInitials(profile.name)}
