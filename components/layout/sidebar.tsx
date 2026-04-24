@@ -46,7 +46,8 @@ export function Sidebar({ profile, notifications, unreadCount }: SidebarProps) {
       </div>
 
       <div className="space-y-4">
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest text-gold/50">Alerts</span>
           <NotificationBell
             userId={profile.id}
             initialCount={unreadCount}
