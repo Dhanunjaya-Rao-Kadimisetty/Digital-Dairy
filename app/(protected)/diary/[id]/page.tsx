@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Film } from "lucide-react";
+import { Film, UserRound } from "lucide-react";
 
 import { CommentThread } from "@/components/diary/comment-thread";
 import { DeleteEntryButton } from "@/components/diary/delete-entry-button";
@@ -12,7 +12,7 @@ import { SectionCard } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getViewerOrRedirect } from "@/lib/auth/approved-users";
 import { getDiaryEntryById } from "@/lib/data/diary";
-import { formatDateTime } from "@/lib/utils";
+import { DiaryDate } from "@/components/diary/diary-date";
 
 function isVideoMedia(url: string) {
   return /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
@@ -33,19 +33,37 @@ export default async function DiaryEntryDetailPage({
 
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Diary detail"
-        title={entry.title}
-        description={`Written ${formatDateTime(entry.created_at)}. ${
-          entry.updated_at !== entry.created_at ? "Updated later, with care." : "Saved as-is."
-        }`}
-        action={
-          <div className="flex flex-wrap gap-3">
-            <StatusBadge variant="accent">{entry.mood}</StatusBadge>
-            <StatusBadge>{entry.visibility}</StatusBadge>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <PageIntro
+          eyebrow="Diary detail"
+          title={entry.title}
+          description={
+            <div className="flex flex-col gap-2">
+              <DiaryDate date={entry.created_at} />
+              {entry.updated_at !== entry.created_at && (
+                <p className="text-xs text-parchment/40 italic">Updated later, with care.</p>
+              )}
+            </div>
+          }
+          action={
+            <div className="flex flex-wrap gap-3">
+              <StatusBadge variant="accent">{entry.mood}</StatusBadge>
+              <StatusBadge>{entry.visibility}</StatusBadge>
+            </div>
+          }
+        />
+        {entry.author && (
+          <div className="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-3 border border-white/5 self-start lg:self-auto">
+            <div className="flex size-10 items-center justify-center rounded-full bg-gold/10">
+              <UserRound className="size-5 text-gold" />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-parchment/40">Written by</p>
+              <p className="font-serif text-lg text-parchment">{entry.author.name}</p>
+            </div>
           </div>
-        }
-      />
+        )}
+      </div>
 
       <SectionCard className="space-y-6">
         <MarkdownContent content={entry.content} />

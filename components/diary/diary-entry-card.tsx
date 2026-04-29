@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Film, ImageIcon, MessageCircle, Sparkles } from "lucide-react";
+import { Film, ImageIcon, MessageCircle, Sparkles, UserRound } from "lucide-react";
 
 import type { DiaryEntry } from "@/lib/types";
-import { formatDateTime, fromNow } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { DiaryDate } from "./diary-date";
 
 function isVideoMedia(url: string) {
   return /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
@@ -46,9 +46,17 @@ export function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
 
       <div className="flex flex-1 flex-col justify-between p-5">
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge variant="accent">{entry.mood}</StatusBadge>
-            <StatusBadge>{entry.visibility}</StatusBadge>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge variant="accent">{entry.mood}</StatusBadge>
+              <StatusBadge>{entry.visibility}</StatusBadge>
+            </div>
+            {entry.author && (
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-parchment/40">
+                <UserRound className="size-3" />
+                {entry.author.name}
+              </div>
+            )}
           </div>
 
           <div>
@@ -60,11 +68,8 @@ export function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
         </div>
 
         <div className="mt-6 space-y-4">
-          <div className="flex items-center gap-3 text-sm text-parchment/50">
-            <span>{formatDateTime(entry.created_at)}</span>
-            <span className="text-parchment/25">•</span>
-            <span>{fromNow(entry.created_at)}</span>
-          </div>
+          <DiaryDate date={entry.created_at} />
+
           <div className="flex items-center gap-4 text-sm text-parchment/55">
             <span className="inline-flex items-center gap-2">
               <MessageCircle className="size-4" />
