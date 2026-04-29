@@ -9,7 +9,7 @@ export function PageIntro({
 }: {
   eyebrow: string;
   title: string;
-  description: string;
+  description: React.ReactNode;
   action?: React.ReactNode;
   className?: string;
 }) {
@@ -19,7 +19,7 @@ export function PageIntro({
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.38em] text-parchment/50">{eyebrow}</p>
           <h1 className="page-title">{title}</h1>
-          <p className="page-copy">{description}</p>
+          <div className="page-copy">{description}</div>
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
