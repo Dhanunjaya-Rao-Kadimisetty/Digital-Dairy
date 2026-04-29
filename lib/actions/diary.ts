@@ -17,7 +17,8 @@ function revalidateDiaryViews(entryId?: string) {
 }
 
 export async function createDiaryEntryAction(
-  values: DiaryEntryValues
+  values: DiaryEntryValues,
+  mediaUrl?: string | null
 ): Promise<ActionResult> {
   const parsed = diaryEntrySchema.safeParse(values);
 
@@ -34,7 +35,8 @@ export async function createDiaryEntryAction(
       content: parsed.data.content,
       mood: parsed.data.mood,
       visibility: parsed.data.visibility,
-      author_id: profile.id
+      author_id: profile.id,
+      media_url: mediaUrl ?? null
     })
     .select("id")
     .single();
@@ -58,7 +60,8 @@ export async function createDiaryEntryAction(
 
 export async function updateDiaryEntryAction(
   entryId: string,
-  values: DiaryEntryValues
+  values: DiaryEntryValues,
+  mediaUrl?: string | null
 ): Promise<ActionResult> {
   const parsed = diaryEntrySchema.safeParse(values);
 
@@ -75,6 +78,7 @@ export async function updateDiaryEntryAction(
       content: parsed.data.content,
       mood: parsed.data.mood,
       visibility: parsed.data.visibility,
+      media_url: mediaUrl !== undefined ? mediaUrl : undefined,
       updated_at: new Date().toISOString()
     })
     .eq("id", entryId)
@@ -91,6 +95,14 @@ export async function updateDiaryEntryAction(
 export async function deleteDiaryEntryAction(entryId: string): Promise<ActionResult> {
   const { profile, supabase } = await getViewerOrRedirect();
 
+  // Clean up media from storage if it exists
+  const { data: entry } = await supabase
+    .from("diary_entries")
+    .select("media_url")
+    .eq("id", entryId)
+    .eq("author_id", profile.id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("diary_entries")
     .delete()
@@ -99,6 +111,11 @@ export async function deleteDiaryEntryAction(entryId: string): Promise<ActionRes
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Remove media file from storage after successful delete
+  if (entry?.media_url) {
+    await supabase.storage.from("diary-media").remove([entry.media_url]);
   }
 
   revalidateDiaryViews(entryId);

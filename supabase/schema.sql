@@ -24,6 +24,7 @@ create table if not exists public.diary_entries (
   title text not null,
   content text not null,
   mood text not null,
+  media_url text default null,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   author_id uuid not null references public.profiles (id) on delete cascade,
@@ -264,6 +265,14 @@ values
     false,
     52428800,
     array['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/x-m4a']
+  ),
+  (
+    'diary-media',
+    'diary-media',
+    false,
+    null,
+    array['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
+           'video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska']
   )
 on conflict (id) do update
 set
@@ -276,7 +285,7 @@ create policy "storage_read_gallery_and_voice"
 on storage.objects
 for select
 using (
-  bucket_id in ('gallery', 'voice-notes')
+  bucket_id in ('gallery', 'voice-notes', 'diary-media')
   and public.is_approved_user()
 );
 
@@ -285,7 +294,7 @@ create policy "storage_insert_gallery_and_voice_owner"
 on storage.objects
 for insert
 with check (
-  bucket_id in ('gallery', 'voice-notes')
+  bucket_id in ('gallery', 'voice-notes', 'diary-media')
   and public.is_approved_user()
 );
 
@@ -294,12 +303,12 @@ create policy "storage_update_gallery_and_voice_owner"
 on storage.objects
 for update
 using (
-  bucket_id in ('gallery', 'voice-notes')
+  bucket_id in ('gallery', 'voice-notes', 'diary-media')
   and public.is_approved_user()
   and owner = auth.uid()
 )
 with check (
-  bucket_id in ('gallery', 'voice-notes')
+  bucket_id in ('gallery', 'voice-notes', 'diary-media')
   and public.is_approved_user()
   and owner = auth.uid()
 );
@@ -309,7 +318,7 @@ create policy "storage_delete_gallery_and_voice_owner"
 on storage.objects
 for delete
 using (
-  bucket_id in ('gallery', 'voice-notes')
+  bucket_id in ('gallery', 'voice-notes', 'diary-media')
   and public.is_approved_user()
   and owner = auth.uid()
 );

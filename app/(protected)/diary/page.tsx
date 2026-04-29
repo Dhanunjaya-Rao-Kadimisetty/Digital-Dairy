@@ -74,7 +74,7 @@ export default async function DiaryPage({
           </p>
           <h2 className="mt-3 font-serif text-3xl text-parchment">Write what matters today.</h2>
         </div>
-        <DiaryEntryForm />
+        <DiaryEntryForm userId={profile.id} />
       </SectionCard>
 
       {entries.length ? (

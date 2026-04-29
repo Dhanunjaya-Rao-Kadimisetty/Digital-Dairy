@@ -14,6 +14,7 @@ export type DiaryEntry = {
   title: string;
   content: string;
   mood: string;
+  media_url: string | null;
   created_at: string;
   updated_at: string;
   author_id: string;
@@ -21,6 +22,7 @@ export type DiaryEntry = {
   author?: Profile;
   comments?: CommentItem[];
   reactions?: Reaction[];
+  media_signed_url?: string | null;
 };
 
 export type CommentItem = {

@@ -7,6 +7,34 @@ type DiaryFilters = {
   date?: string;
 };
 
+/** Generate signed URLs for entries that have media attached. */
+async function attachMediaSignedUrls(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  entries: DiaryEntry[]
+): Promise<DiaryEntry[]> {
+  const mediaPaths = entries
+    .map((e) => e.media_url)
+    .filter((url): url is string => Boolean(url));
+
+  if (mediaPaths.length === 0) return entries;
+
+  const { data: signedData } = await supabase.storage
+    .from("diary-media")
+    .createSignedUrls(mediaPaths, 60 * 60); // 1 hour
+
+  const signedMap = new Map<string, string>();
+  signedData?.forEach((item) => {
+    if (item.signedUrl && item.path) {
+      signedMap.set(item.path, item.signedUrl);
+    }
+  });
+
+  return entries.map((entry) => ({
+    ...entry,
+    media_signed_url: entry.media_url ? signedMap.get(entry.media_url) ?? null : null
+  }));
+}
+
 export async function getDiaryEntries(profile: Profile, filters: DiaryFilters = {}) {
   const supabase = await createSupabaseServerClient();
   let query = supabase
@@ -38,7 +66,8 @@ export async function getDiaryEntries(profile: Profile, filters: DiaryFilters = 
     throw new Error(error.message);
   }
 
-  return (data ?? []) as DiaryEntry[];
+  const entries = (data ?? []) as DiaryEntry[];
+  return attachMediaSignedUrls(supabase, entries);
 }
 
 export async function getDiaryEntryById(entryId: string, profile: Profile) {
@@ -80,8 +109,20 @@ export async function getDiaryEntryById(entryId: string, profile: Profile) {
     return null;
   }
 
+  const typedEntry = entry as DiaryEntry;
+
+  // Generate signed URL for media if present
+  let mediaSignedUrl: string | null = null;
+  if (typedEntry.media_url) {
+    const { data: signedData } = await supabase.storage
+      .from("diary-media")
+      .createSignedUrl(typedEntry.media_url, 60 * 60);
+    mediaSignedUrl = signedData?.signedUrl ?? null;
+  }
+
   return {
-    ...(entry as DiaryEntry),
+    ...typedEntry,
+    media_signed_url: mediaSignedUrl,
     comments: (comments ?? []) as CommentItem[],
     reactions: (reactions ?? []) as Reaction[]
   };
