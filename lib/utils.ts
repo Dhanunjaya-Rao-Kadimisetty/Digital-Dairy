@@ -32,6 +32,12 @@ export function getInitials(name: string) {
 }
 
 export function slugifyFilename(name: string) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const lastDotIndex = name.lastIndexOf(".");
+  if (lastDotIndex === -1) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  }
+  const ext = name.slice(lastDotIndex).toLowerCase().replace(/[^a-z0-9.]+/g, "");
+  const base = name.slice(0, lastDotIndex).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return `${base}${ext}`;
 }
 

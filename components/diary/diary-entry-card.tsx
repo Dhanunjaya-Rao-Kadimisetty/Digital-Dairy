@@ -6,7 +6,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DiaryDate } from "./diary-date";
 
 function isVideoMedia(url: string) {
-  return /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
+  const path = url.split("?")[0];
+  return /[\.-](mp4|webm|mov|avi|mkv)$/i.test(path);
 }
 
 export function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {

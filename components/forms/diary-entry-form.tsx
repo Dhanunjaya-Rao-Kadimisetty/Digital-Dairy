@@ -22,7 +22,8 @@ import {
 import { FieldError } from "@/components/ui/field-error";
 
 function isVideoFile(name: string) {
-  return /\.(mp4|webm|mov|avi|mkv)$/i.test(name);
+  const path = name.split("?")[0];
+  return /[\.-](mp4|webm|mov|avi|mkv)$/i.test(path);
 }
 
 export function DiaryEntryForm({

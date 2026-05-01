@@ -15,7 +15,8 @@ import { getDiaryEntryById } from "@/lib/data/diary";
 import { DiaryDate } from "@/components/diary/diary-date";
 
 function isVideoMedia(url: string) {
-  return /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
+  const path = url.split("?")[0];
+  return /[\.-](mp4|webm|mov|avi|mkv)$/i.test(path);
 }
 
 export default async function DiaryEntryDetailPage({
